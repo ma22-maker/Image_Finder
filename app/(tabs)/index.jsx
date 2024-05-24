@@ -18,7 +18,8 @@ import {
   useGetTrends,
   useGetCollections,
   useGetRandomPhotos,
-  useGetGeneratedPic
+  useGetGeneratedPic,
+  useGetGeneratedImage
 } from "../../hooks/getTopichook";
 import { getGreetingTime } from "../../api/helper";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -34,8 +35,10 @@ export default function Homeapp() {
   const { data: Trends, status } = useGetTrends();
   const { data: collections, isPending } = useGetCollections();
   const { data: RandomPhotos } = useGetRandomPhotos();
-  // const { data: GeneratedPic } = useGetGeneratedPic();
-  // console.log(GeneratedPic)
+  const { data: GeneratedPic } = useGetGeneratedPic();
+  const processId =GeneratedPic?.process_id
+  const { data: GeneratedImage } = useGetGeneratedImage(processId);
+  console.log(GeneratedImage)
 
   useEffect(() => {
     setGreeting(getGreetingTime()); // Call the helper function on load

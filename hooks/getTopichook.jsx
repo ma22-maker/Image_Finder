@@ -110,34 +110,74 @@ export function useGetRandomPhotos() {
 }
 
 
-    // export function useGetGeneratedPic() {
-    //   return useQuery({
-    //     queryKey: ["GeneratedPic"],
-    //     queryFn: async () => {
-    //       try {
-    //         const response = await axios.post(
-    //             'https://api.openai.com/v1/images/generations',
-    //             {
-    //                 model: 'dall-e-2',
-    //                 prompt:'tree walking on the muddy road when it is raining',
-    //                 n: 1,
-    //                 size: '1024x1024',
-    //             },
-    //             {
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     Authorization: "Bearer sk-proj-qTDABbtXbixNe3b7LUwfT3BlbkFJvm7cSoOsYWdi1mRGzuox",
-    //                 },
-    //             }
-    //         );
-    //         console.log(response.data);
-    //         console.log(response.data.data[0].url);
-    //     } catch (error) {
-    //       console.error('Error generating image from chatgpt:', error);
-    //       setError(error.message);
-    //   } 
-    //     },
-    //   });
-    // }
+    export function useGetGeneratedPic() {
+      return useQuery({
+        queryKey: ["GeneratedPic"],
+        queryFn: async () => {
+          const options = {
+            method: 'POST',
+            headers: {
+              accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IjhiYmVjMTI5NGU3NjY4M2EwYzgwNjJhOWM0YTU2ZjA2IiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMjNUMTM6NTA6NTkuNDc4ODIzIn0.UjUQMybosHTMTtuqrD0dPwcU0WKbi2JTPRnrHJXCpZw'
+            },
+            body: JSON.stringify({
+              aspect_ratio: 'square',
+              guidance_scale: 7.5,
+              negprompt: 'deformed, bad anatomy, disfigured, poorly drawn face',
+              prompt: 'tree walking on a muddey road in japan',
+              safe_filter: true,
+              samples: 1,
+              seed: 2414,
+              steps: 15,
+              style: 'lowpoly'
+            })
+          };
+      
+          try {
+            const response = await fetch('https://api.monsterapi.ai/v1/generate/txt2img', options);
+            if (!response.ok) {
+              throw new Error(`API request failed with status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log(data)
+            console.log(data.process_id)
+           return(data)
+          } catch (err) {
+            console.log(err.message);
+          }
+      
+        },
+      });
+    }
     
+  
+    export function useGetGeneratedImage(processId) {
+      return useQuery({
+        queryKey: ["GeneratedImage", processId], 
+        queryFn: async () => {
+          if (!processId) {
+            return null; 
+          }
+    
+          const statusOptions = {
+            method: 'GET',
+            headers: {
+              accept: 'application/json',
+              Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IjhiYmVjMTI5NGU3NjY4M2EwYzgwNjJhOWM0YTU2ZjA2IiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMjNUMTM6NTA6NTkuNDc4ODIzIn0.UjUQMybosHTMTtuqrD0dPwcU0WKbi2JTPRnrHJXCpZw' // Replace with your actual API key
+            }
+          };
+    
+          const resp = await fetch(`https://api.monsterapi.ai/v1/status/${processId}`, statusOptions);
+          if (!resp.ok) {
+            throw new Error(`Failed to retrieve image status: ${statusResponse.status}`);
+          }
+    
+          const imageData = await resp.json();
+          console.log(imageData)
+          return imageData; 
+        },
+        enabled: !!processId,
+      });
+    }
   
